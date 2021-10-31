@@ -1,0 +1,268 @@
+$(document).ready(function () {
+    console.log(typeof UserSettings_GetDataFromCookies('limitedOpportunitiesEnabled', false));
+    if (UserSettings_GetDataFromCookies('limitedOpportunitiesEnabled', false) == 'true') {
+        UserSettings_Init();
+    }
+});
+
+var us_selected = "us-selected";
+var us_items = { fontSize: "us-fontsize-item", fontType: "us-fonttype-item", letterInterval: "us-letterinterval-item", colorScheme: "us-colorscheme-item" };
+var us_fontSize = { small: "us-fontsize-small", medium: "us-fontsize-medium", large: "us-fontsize-large" };
+var us_fontType = { arial: "us-fonttype-arial", tnr: "us-fonttype-timesnewroman" };
+var us_letterInterval = { standart: "us-letterinterval-standart", medium: "us-letterinterval-medium", large: "us-letterinterval-large" };
+var us_colorScheme = { whiteblack: "us-colorscheme-whiteblack", blackwhite: "us-colorscheme-blackwhite", cyanblue: "us-colorscheme-cyanblue", beigebrown: "us-colorscheme-beigebrown", browngreen: "us-colorscheme-browngreen" };
+var us_defaultSettings = { fontSize: us_fontSize.small, fontType: us_fontType.arial, letterInterval: us_letterInterval.standart, colorScheme: us_colorScheme.whiteblack };
+var us_cookiesNames = { fontSize: "us_fontSize", fontType: "us_fontType", letterInterval: "us_letterInterval", colorScheme: "us_colorScheme" };
+var us_cookiesParam = { expires: 7, path: "/" };
+
+function UserSettings_Init() {
+    var userSettingsLnk = $('.us-full-settings-lnk');
+    var userSettings = $('.us-full-settings');
+    var usDefaultversionLnk = $('.us-default-version-lnk');
+
+    if (userSettingsLnk.length > 0 && userSettings.length > 0) {
+        userSettingsLnk.on('click', function () {
+            console.log(1);
+            userSettings.slideToggle();
+            console.log(2);
+        });
+    }
+
+    usDefaultversionLnk.on('click', function () {
+        $.removeCookie('IsAccessible', { path: '/' });
+        UserSettings_SetDefaultSettings();
+        $('body').removeClass();
+        /*$('#content-wrapper').removeClass();
+        $('#content-wrapper').addClass('content-wrapper');*/
+       /* $('body').addClass('qwert');*/
+    });
+
+    $('.us-default-btn').on('click', function () {
+        UserSettings_SetDefaultSettings();
+    });
+
+    $('.us-close-btn').on('click', function () {
+        userSettings.slideUp();
+    });
+
+    UserSettings_SelectableInit(us_items.fontSize);
+    UserSettings_SelectableInit(us_items.fontType);
+    UserSettings_SelectableInit(us_items.letterInterval);
+    UserSettings_SelectableInit(us_items.colorScheme);
+
+    UserSettings_ApplySavedSettings();
+}
+
+function UserSettings_SelectableInit(className) {
+    $("." + className).on('click', function () {
+        UserSettings_SetSelectedSettings(className, this);
+    });
+}
+
+function UserSettings_SetSelectedSettings(className, obj) {
+    var $obj = $(obj);
+    if (!$obj.hasClass(us_selected)) {
+        $("." + className + "." + us_selected).removeClass(us_selected);
+        var classList = $obj[0].classList;
+        // ie does not support classList
+        if (classList == null)
+            classList = $obj[0].className.split(/\s+/);
+        var classListEl2 = classList[2];
+        if (classListEl2 != "") {
+            $("." + className + "." + classListEl2).addClass(us_selected);
+            var body = $("body");
+          /*  var contentWrapper =$(".content-wrapper") && !contentWrapper.hasClass(classListEl2);*/
+            if (!body.hasClass(classListEl2)) {
+                if (className == us_items.fontSize)
+                    UserSettings_SetSelectedFontSize(classListEl2);
+                if (className == us_items.fontType)
+                    UserSettings_SetSelectedFontType(classListEl2);
+                if (className == us_items.letterInterval)
+                    UserSettings_SetSelectedLetterInterval(classListEl2);
+                if (className == us_items.colorScheme)
+                    UserSettings_SetSelectedColorScheme(classListEl2);
+                UserSettings_UpdateExtComponents();
+                UserSettings_SaveCurrentSettings();
+            }
+        }
+    }
+}
+
+function UserSettings_UpdateExtComponents() {
+   /* var containers = Ext.ComponentQuery.query('container');
+    Ext.each(containers, function (container) {
+        if (!container.ownerCt) {
+            container.doLayout();
+        }
+    });*/
+}
+
+function UserSettings_SetSelectedFontSize(fontSize) {
+    UserSettings_ClearFontSize();
+   /* $("body").add($('.content-wrapper')).addClass(fontSize);*/
+    $("body").addClass(fontSize);
+    UserSettings_PutDataInCookies(us_cookiesNames.fontSize, fontSize);
+}
+
+function UserSettings_ClearFontSize() {
+    var body = $("body");
+   /* var contentWrapper =$(".content-wrapper");*/
+    body.removeClass(us_fontSize.small);
+    body.removeClass(us_fontSize.medium);
+    body.removeClass(us_fontSize.large);
+    /*contentWrapper.removeClass(us_fontSize.small);
+    contentWrapper.removeClass(us_fontSize.medium);
+    contentWrapper.removeClass(us_fontSize.large);*/
+}
+
+
+function UserSettings_SetSelectedFontType(fontType) {
+    UserSettings_ClearFontType();
+    $("body").addClass(fontType);
+    UserSettings_PutDataInCookies(us_cookiesNames.fontType, fontType);
+}
+
+function UserSettings_ClearFontType() {
+    var body = $("body");
+    body.removeClass(us_fontType.arial);
+    body.removeClass(us_fontType.tnr);
+}
+
+function UserSettings_SetSelectedLetterInterval(letterInterval) {
+    UserSettings_ClearLetterInterval();
+    /*var contentWrapper = $(".content-wrapper");*/
+    /*$("body").add(contentWrapper).addClass(letterInterval);*/
+    $("body").addClass(letterInterval);
+    UserSettings_PutDataInCookies(us_cookiesNames.letterInterval, letterInterval);
+}
+
+function UserSettings_ClearLetterInterval() {
+    var body = $("body");
+    /*var contentWrapper = $(".content-wrapper");*/
+   /* body.add(contentWrapper).removeClass(us_letterInterval.standart);
+    body.add(contentWrapper).removeClass(us_letterInterval.medium);
+    body.add(contentWrapper).removeClass(us_letterInterval.large);*/
+    body.removeClass(us_letterInterval.standart);
+    body.removeClass(us_letterInterval.medium);
+    body.removeClass(us_letterInterval.large);
+}
+
+function UserSettings_SetSelectedColorScheme(colorScheme) {
+    UserSettings_ClearColorScheme();
+    var popupSettings = $('.us-full-settings');
+    /*var contentWrapper =$(".content-wrapper");*/
+    /*$("body").add(popupSettings).add(contentWrapper).addClass(colorScheme);*/
+    $("body").add(popupSettings).addClass(colorScheme);
+    UserSettings_PutDataInCookies(us_cookiesNames.colorScheme, colorScheme);
+}
+
+function UserSettings_ClearColorScheme() {
+    var body = $("body");
+    var popupSettings = $('.us-full-settings');
+    /*var contentWrapper =$(".content-wrapper");*/
+    /*body.add(popupSettings).add(contentWrapper).removeClass(us_colorScheme.whiteblack);
+    body.add(popupSettings).add(contentWrapper).removeClass(us_colorScheme.blackwhite);
+    body.add(popupSettings).add(contentWrapper).removeClass(us_colorScheme.cyanblue);
+    body.add(popupSettings).add(contentWrapper).removeClass(us_colorScheme.beigebrown);
+    body.add(popupSettings).add(contentWrapper).removeClass(us_colorScheme.browngreen);*/
+    body.add(popupSettings).removeClass(us_colorScheme.whiteblack);
+    body.add(popupSettings).removeClass(us_colorScheme.blackwhite);
+    body.add(popupSettings).removeClass(us_colorScheme.cyanblue);
+    body.add(popupSettings).removeClass(us_colorScheme.beigebrown);
+    body.add(popupSettings).removeClass(us_colorScheme.browngreen);
+
+}
+
+function UserSettings_ClearSettings() {
+    UserSettings_ClearFontSize();
+    UserSettings_ClearFontType();
+    UserSettings_ClearLetterInterval();
+    UserSettings_ClearColorScheme();
+}
+
+function UserSettings_SetDefaultSettings() {
+    UserSettings_ClearSettings();
+    UserSettings_PutDataInCookies(us_cookiesNames.fontSize, us_defaultSettings.fontSize);
+    UserSettings_PutDataInCookies(us_cookiesNames.fontType, us_defaultSettings.fontType);
+    UserSettings_PutDataInCookies(us_cookiesNames.letterInterval, us_defaultSettings.letterInterval);
+    UserSettings_PutDataInCookies(us_cookiesNames.colorScheme, us_defaultSettings.colorScheme);
+    UserSettings_SaveCurrentSettings();
+    UserSettings_ApplySettings(us_defaultSettings.fontSize, us_defaultSettings.fontType, us_defaultSettings.letterInterval, us_defaultSettings.colorScheme);
+    UserSettings_UpdateExtComponents();
+}
+
+function UserSettings_ApplySettings(fontSize, fontType, letterInterval, colorScheme) {
+    var body = $("body");
+   /* var contentWrapper =$(".content-wrapper");*/
+    /*body.add(contentWrapper).addClass(fontSize);
+    body.add(contentWrapper).addClass(fontType);
+    body.add(contentWrapper).addClass(letterInterval);
+    body.add(contentWrapper).addClass(colorScheme);*/
+    body.addClass(fontSize);
+    body.addClass(fontType);
+    body.addClass(letterInterval);
+    body.addClass(colorScheme);
+
+    UserSettings_ApplySettingsToUIElement(us_items.fontSize, fontSize);
+    UserSettings_ApplySettingsToUIElement(us_items.fontType, fontType);
+    UserSettings_ApplySettingsToUIElement(us_items.letterInterval, letterInterval);
+    UserSettings_ApplySettingsToUIElement(us_items.colorScheme, colorScheme);
+}
+
+function UserSettings_ApplySettingsToUIElement(elementTypeClass, elementValueClass) {
+    var $obj = $("." + elementTypeClass + "." + elementValueClass);
+    if (!$obj.hasClass(us_selected)) {
+        $("." + elementTypeClass + "." + us_selected).removeClass(us_selected);
+        $obj.addClass(us_selected);
+    }
+}
+
+function UserSettings_SaveCurrentSettings() {
+    /*$.ajax({
+        url: saveActionRoute,
+        type: "POST"
+    });*/
+}
+
+function UserSettings_PutDataInCookies(cookieName, data) {
+    $.cookie(cookieName, data, us_cookiesParam);
+}
+
+function UserSettings_ApplySavedSettings() {
+    UserSettings_ClearSettings();
+
+    var fontSize = UserSettings_GetDataFromCookies(us_cookiesNames.fontSize, us_defaultSettings.fontSize);
+    var fontType = UserSettings_GetDataFromCookies(us_cookiesNames.fontType, us_defaultSettings.fontType);
+    var letterInterval = UserSettings_GetDataFromCookies(us_cookiesNames.letterInterval, us_defaultSettings.letterInterval);
+    var colorScheme = UserSettings_GetDataFromCookies(us_cookiesNames.colorScheme, us_defaultSettings.colorScheme);
+
+   /* var pageHeader = $('.header');
+    var TopUl = $('.top-menu ul');*/
+    var usQuick = $('.us-quick-settings');
+    var limitedOpportunities = $('.limited-opportunities');
+
+    console.log([colorScheme, us_defaultSettings.colorScheme]);
+
+    //if (colorScheme == us_defaultSettings.colorScheme) {
+    if (UserSettings_GetDataFromCookies('limitedOpportunitiesEnabled', false) != 'true') {
+        $('body').addClass('us-lowvision-disabled');
+    } else {
+        $('body').addClass('us-lowvision-enabled');
+       /* pageHeader.css({background: 'none'}); //Убираем фоновую картинку
+        TopUl.css({background: 'none'}); //Убираем фоновую картинку*/
+        usQuick.toggleClass('us-quick-settings--open');
+        limitedOpportunities.addClass('limited-opportunities--close');
+    }
+    
+    UserSettings_ApplySettings(fontSize, fontType, letterInterval, colorScheme);
+    UserSettings_UpdateExtComponents();
+}
+
+function UserSettings_GetDataFromCookies(cookieName, defaultValue) {
+    var value = $.cookie(cookieName);
+    if (value == undefined || value == "" || value == '[]') {
+        return defaultValue;
+    }
+    return value;
+}
+

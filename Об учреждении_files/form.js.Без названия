@@ -1,0 +1,55 @@
+/**
+ * @author Alexandr Kirshin <kirshin.as@gmail.com>
+ */
+
+var form = function () {
+
+    var init = function (container, config, before, after, error) {
+        var form = container.find('form');
+        if (config.validate) {
+            form.validate(config.rules);
+        }
+        if (config.ajax) {
+
+            form.ajaxForm({
+                beforeSubmit: function (arr, jQueryform, options) {
+                    before(arr, jQueryform, options);
+                },
+                error: function () {
+                    error();
+                },
+                success: function (response) {
+                    var id = '#' + container.attr('id') + '-inner';
+                    if (container.find(id).length) {
+                        container.find(id).html(response);
+                    } else {
+                        container.html(response);
+                    }
+                    after(response);
+                    init(container, config, before, after, error);
+                }
+            });
+        }
+        captcha();
+    };
+
+    var captcha = function () {
+        jQuery('.refresh-captcha').click(function (e) {
+            e.preventDefault();
+            var group = jQuery(this).parents('.captcha-group');
+            jQuery.ajax({
+                url: "/bitrix/tools/ajax_captcha.php"
+            }).done(function (response) {
+                var sid = eval('[' + response + ']');
+                group.find('.form-captcha').attr('src', "/bitrix/tools/captcha.php?captcha_code=" + sid[0].captcha_sid);
+                group.find('input[type="hidden"]').val(sid[0].captcha_sid);
+            });
+        });
+    };
+
+    return {
+        init: function (container, config, before, after, error) {
+            init(container, config, before, after, error);
+        }
+    }
+}();

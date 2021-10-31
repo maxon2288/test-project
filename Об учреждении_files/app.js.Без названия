@@ -1,0 +1,152 @@
+$(document).ready(function() {
+   var sliderPartners = function() {
+     $('.partners-slider').slick({
+         infinite: false,
+         slidesToShow: 3,
+         slidesToScroll: 1,
+         arrows: true,
+         prevArrow: '<button type="button" class="button-slide  button-slide-prev ">Previous <i class="icon icon-arrow_left-big"></i></button>',
+         nextArrow: '<button type="button" class="button-slide  button-slide-next"><i class=" icon' +
+         ' icon-arrow_rightt-big"></i></button>',
+         responsive: [
+             {
+                 breakpoint: 768,
+                 settings: {
+                     slidesToShow: 2,
+                     prevArrow: '<button type="button" class="button-slide  button-slide-prev ">Previous <i class="icon icon-arrow_left-little"></i></button>',
+                     nextArrow: '<button type="button" class="button-slide  button-slide-next"><i class=" icon icon-arrow_right-little"></i></button>'
+                 }
+             }]
+     });
+   };
+
+    $('.lazy').slick({
+        lazyLoad: 'ondemand',
+        slidesToShow: 3,
+        slidesToScroll: 1
+    });
+
+    sliderPartners();
+});
+
+
+$(document).ready(function() {
+   $('.banner-slider').slick({
+       arrows: false,
+       dots: true,
+       infinite: true,
+       slidesToScroll: 1,
+       autoplay: true,
+       autoplaySpeed: 2000
+   });
+});
+
+
+/*$(document).ready(function () {
+    $('.panel-heading a').hover(function () {
+        var a = $(this).parents('.panel');
+        a.find('.collapse').css({display: "block !important"});
+    })
+});*/
+
+/*Фиксация меню при скроле*/
+$(document).ready(function() {
+    var $headerNav = $('.navbar-inverse');
+    var  headerNavTopPosition = $headerNav.offset().top;
+    $(window).on('scroll', function(){
+        if($(window).scrollTop() > headerNavTopPosition ) {
+            $headerNav.addClass('navbar__nav-is_fixed');
+        } else {
+            $headerNav.removeClass('navbar__nav-is_fixed');
+
+        }
+    });
+
+});
+
+
+jQuery(document).ready(function($) {
+    var popupSettings = $('.us-full-settings'); //Всплывающее окно настроек
+    var usQuick = $('.us-quick-settings'); //Первая панель настроек
+    var limitedOpportunities = $('.limited-opportunities'); // блок дял перехода на версию слабовидящих
+    var ourBody = $('body');
+    var usualVersion = $('.us-default-version-lnk'); //Переход на обычную версию
+    var fieldset = $('fieldset');
+
+    //Закрытие окна настроек при нажатии ESC
+    window.addEventListener("keydown", function(event) {
+        if (event.keyCode === 27) {
+            if (popupSettings.hasClass("popupSettingsOpen")) {
+                popupSettings.fadeOut('slow');
+            }
+        }
+    });
+
+    //События по клику на блок для перехода на версию слабовидящих
+    limitedOpportunities.on('click', function(event) {
+        event.preventDefault();
+        var unUsualBody = ourBody.addClass('unUsualBody'); /*unUsualBody -  пустой класс для того, чтобы сообщить,что мы в версии для слабовидящих*/
+        usQuick.toggleClass('us-quick-settings--open'); /*Открываем скрытое меню настроек первого уровня*/
+        limitedOpportunities.addClass('limited-opportunities--close');/* Скрываем ссылку перехода на версию
+         для слабовидящих*/
+        popupSettings.addClass('popupSettingsOpen'); /*Добавляем Меню настроек 2-го уровня класс, чтобы в дальнешем
+         его закрывать по ESC*/
+        UserSettings_Init();
+        UserSettings_PutDataInCookies('limitedOpportunitiesEnabled', true);
+        console.log(UserSettings_GetDataFromCookies('limitedOpportunitiesEnabled', false));
+    });
+
+//События по клику на блок для перехода на обычную версию
+    usualVersion.on('click', function(event) {
+        event.preventDefault();
+        usQuick.toggleClass('us-quick-settings--open'); // Cкрываем меню настроек первого уровня
+        limitedOpportunities.removeClass('limited-opportunities--close'); //Открываем надпись Версия для слабовидящих
+        $('body').removeClass();
+        UserSettings_PutDataInCookies('limitedOpportunitiesEnabled', false);
+
+    });
+    
+    function checkCookies(){
+        let cookieDate = localStorage.getItem('cookieDate');
+        let cookieNotification = document.getElementById('cookie-msg');
+        let cookieBtn = cookieNotification.querySelector('#cookie_accept');
+		console.log(cookieDate);
+        // Если записи про кукисы нет или она просрочена на 1 год, то показываем информацию про кукисы
+        if( !cookieDate || (+cookieDate + 31536000000) < Date.now() ){
+            cookieNotification.style.display='block';
+        }
+
+        // При клике на кнопку, в локальное хранилище записывается текущая дата в системе UNIX
+        cookieBtn.addEventListener('click', function(){
+            localStorage.setItem( 'cookieDate', Date.now() );
+            // cookieNotification.classList.remove('show');
+            cookieNotification.style.display='none';
+        })
+    }
+    checkCookies();
+
+});
+
+/* if($('body.us-fontsize-large')) {
+ var lasT = $('nav li:last-child');
+ if($(window).width() > 992 || $(window).width() < 1199 ) {
+ lasT.find('.dropdown-menu').removeClass('dropdown-menu-right');
+ lasT.find('.dropdown-menu').addClass('dropdown-menu-left');
+ } else if($(window).width() > 1200) {
+ lasT.find('.dropdown-menu').removeClass('dropdown-menu-left');
+ lasT.find('.dropdown-menu').addClass('dropdown-menu-right');
+ }
+ }*/
+/*
+$('.us-fontsize-large').click(function() {
+    $('li.dropdown').addClass('ufl');
+
+    if($('li.dropdown.ufl')) {
+        if($(window).width() > 992 || $(window).width() < 1199 ) {
+            console.log(1);
+            var lasT = $('nav li:last-child');
+            lasT.find('.dropdown-menu').removeClass('dropdown-menu-right');
+            lasT.find('.dropdown-menu').addClass('dropdown-menu-left');
+        }
+    }
+})*/
